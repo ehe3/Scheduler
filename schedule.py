@@ -1,3 +1,4 @@
+import sys
 import json
 import webbrowser
 import httplib2
@@ -7,6 +8,17 @@ from oauth2client import client
 
 
 if __name__ == '__main__':
+
+  if len(sys.argv) == 1:
+    date = datetime.datetime.now().date()
+  elif len(sys.argv) == 2:
+    a = sys.argv[1].split('/')
+    a = [int(num) for num in a]
+    # need to add in proper error handler
+    date = datetime.date(a[2], a[0], a[1])
+  else:
+    print("Invalid parameters")
+
   flow = client.flow_from_clientsecrets(
     'client_secrets.json',
     scope='https://www.googleapis.com/auth/calendar.readonly',
@@ -34,8 +46,6 @@ if __name__ == '__main__':
       break
 
   # loops through each individual calendar to find matches
-  curr_date = datetime.datetime.now().date()
-  test = datetime.date(2017,2,10)
   page_token = None
   for calendar in calendars:
     while True:
@@ -46,7 +56,7 @@ if __name__ == '__main__':
           date_obj = datetime.datetime.strptime(date_only[0], '%Y-%m-%d').date()
         elif event['start'].get('date'):
           date_obj = datetime.datetime.strptime(event['start']['date'], '%Y-%m-%d').date()
-        if (date_obj == test):
+        if (date_obj == date):
           print event['summary']
       page_token = events.get('nextPageToken')
       if not page_token:
